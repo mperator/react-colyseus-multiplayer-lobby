@@ -1,6 +1,9 @@
+import { Client } from 'colyseus.js';
 import { useParams } from 'react-router-dom'
 
-type Props = {}
+type Props = {
+    client: Client
+}
 
 const RoomPage = (props: Props) => {
     const { roomId } = useParams();
