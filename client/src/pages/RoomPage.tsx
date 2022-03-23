@@ -12,6 +12,9 @@ const RoomPage = ({ client }: Props) => {
     const [session, setSession] = useState("");
 
     useEffect(() => {
+
+        
+
         let room: Room;
         
         (async (roomId: any) => {
@@ -21,12 +24,17 @@ const RoomPage = ({ client }: Props) => {
                 const { roomId, sessionId } = JSON.parse(item);
                 room = await client.reconnect(roomId, sessionId);
                 localStorage.setItem(roomId, JSON.stringify({ roomId: room.id, sessionId: room.sessionId }));
+                setSession(r => room.sessionId);
             } else {
-                room = await client.joinById(roomId);
-                localStorage.setItem(roomId, JSON.stringify({ roomId: room.id, sessionId: room.sessionId }));
+                try
+                {
+                    room = await client.joinById(roomId)
+                    localStorage.setItem(roomId, JSON.stringify({ roomId: room.id, sessionId: room.sessionId }));
+                    setSession(r => room.sessionId);
+                } catch(e) {
+                    console.error(e);
+                }
             }
-    
-            setSession(room.sessionId);
         })(roomId);
 
         return () => {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import type { Client, Room, RoomAvailable } from "colyseus.js"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 type Props = {
     client: Client
@@ -8,6 +8,7 @@ type Props = {
 
 const LobbyPage = ({ client }: Props) => {
     const [rooms, setRooms] = useState<RoomAvailable[]>([])
+    const navigate = useNavigate();
 
     const handleLobbyRoomsInit = useCallback((r: RoomAvailable[]) => setRooms(r), [rooms]);
     const handleLobbyRoomsAdd = useCallback(([id, room]: any) => {
@@ -36,14 +37,26 @@ const LobbyPage = ({ client }: Props) => {
       }
     }, []);
 
-    const handleJoinOrCreateTestRoomAsync = async () => {
-        await client.joinOrCreate("testroom");
+    const handleJoinRandomRoomAsync = async () => {
+        const room = await client.join("testroom");
+        localStorage.setItem(room.id, JSON.stringify({ roomId: room.id, sessionId: room.sessionId }));
+        room.leave(false);
+        navigate(`/${room.id}`);
+    }
+
+    const handleCreateRoomAsync = async () => {
+        const room = await client.create("testroom");
+        localStorage.setItem(room.id, JSON.stringify({ roomId: room.id, sessionId: room.sessionId }));
+        room.leave(false);
+        navigate(`/${room.id}`);
     }
 
     return (
         <div>
             <h1>Lobby</h1>
-            <input type="button" value="create and join" onClick={handleJoinOrCreateTestRoomAsync}/>
+
+            <input type="button" value="join random" onClick={handleJoinRandomRoomAsync}/>
+            <input type="button" value="create" onClick={handleCreateRoomAsync}/>
 
             <div>
                 {rooms.map(r => (
